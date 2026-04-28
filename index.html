@@ -283,7 +283,7 @@
         <div class="upload-icon">📸</div>
         <div class="upload-text">
           사진을 드래그하거나 <span>클릭해서 업로드</span>하세요<br>
-          교재, 시험지, 손필기 사진 모두 가능해요
+          캡처 화면 <strong style="color:var(--accent)">Ctrl+V 붙여넣기</strong>도 가능해요
         </div>
       </div>
       <div class="image-preview" id="imagePreview">
@@ -527,6 +527,32 @@ STEP 2. ...
 
   document.getElementById('problemInput').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
+  });
+
+  // 클립보드 이미지 붙여넣기 (Ctrl+V)
+  document.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+        // 이미지 탭으로 자동 전환
+        switchTab('image');
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const result = ev.target.result;
+          uploadedImageBase64 = result.split(',')[1];
+          uploadedImageType = file.type;
+          document.getElementById('previewImg').src = result;
+          document.getElementById('imagePreview').style.display = 'block';
+          document.getElementById('uploadArea').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
   });
 </script>
 </body>
