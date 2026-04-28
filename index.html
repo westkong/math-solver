@@ -278,12 +278,12 @@
       <p class="hint">* 수식은 $수식$ (인라인) 또는 $$수식$$ (블록) 형태로 입력하세요.</p>
     </div>
     <div class="input-panel" id="imagePanel">
-      <div class="image-upload-area" id="uploadArea">
+      <div class="image-upload-area" id="uploadArea" tabindex="0">
         <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" />
         <div class="upload-icon">📸</div>
         <div class="upload-text">
           사진을 드래그하거나 <span>클릭해서 업로드</span>하세요<br>
-          캡처 화면 <strong style="color:var(--accent)">Ctrl+V 붙여넣기</strong>도 가능해요
+          <strong style="color:var(--accent)">이 영역 클릭 후 Ctrl+V</strong>로 캡처 붙여넣기도 가능해요
         </div>
       </div>
       <div class="image-preview" id="imagePreview">
@@ -529,8 +529,8 @@ STEP 2. ...
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
   });
 
-  // 클립보드 이미지 붙여넣기 (Ctrl+V)
-  document.addEventListener('paste', e => {
+  // 클립보드 이미지 붙여넣기 (Ctrl+V) — 전체 document + uploadArea 포커스 시
+  function handlePaste(e) {
     const items = e.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
@@ -538,7 +538,6 @@ STEP 2. ...
         e.preventDefault();
         const file = item.getAsFile();
         if (!file) continue;
-        // 이미지 탭으로 자동 전환
         switchTab('image');
         const reader = new FileReader();
         reader.onload = ev => {
@@ -553,6 +552,13 @@ STEP 2. ...
         break;
       }
     }
+  }
+  document.addEventListener('paste', handlePaste);
+  document.getElementById('uploadArea').addEventListener('paste', handlePaste);
+
+  // uploadArea 클릭 시 포커스 (Ctrl+V 받기 위해)
+  document.getElementById('uploadArea').addEventListener('click', function(e) {
+    if (e.target.tagName !== 'INPUT') this.focus();
   });
 </script>
 </body>
